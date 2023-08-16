@@ -57,18 +57,21 @@ impl AuthReq {
         //     .request_async(async_http_client)
         //     .await?;
         // info!("Token result: {:#?}", token_result);
+        let url = format!("{}?", self.token_url.clone());
         let mut body = "".to_string();
         body.push_str(&format!("client_id={}", self.client_id));
-        // body.push_str(&format!("&client_secret={}", self.client_secret));
+        body.push_str(&format!("&client_secret={}", self.client_secret));
         body.push_str(&format!("&grant_type=authorization_code"));
-        body.push_str(&format!("&redirect_uri={}", self.redirect_url.clone()));
-        body.push_str(&format!("&code={}", code));
+        // body.push_str(&format!("&redirect_uri={}", self.redirect_url.clone()));
+        body.push_str(&format!("&redirect_uri={}", self.auth_url.clone()));
         body.push_str(&format!("&code_verifier={}", pkce_verifier.secret()));
+        body.push_str(&format!("&code={}", code));
+        info!("Body: {}", body.clone());
         let client = reqwest::Client::new();
         let res = client
-            .post(self.token_url.clone())
+            .post(url)
             .header(reqwest::header::CONTENT_TYPE, "application/x-www-form-urlencoded")
-            .header(reqwest::header::HeaderName::from_static("client_id"), self.client_id.clone())
+            // .header(reqwest::header::HeaderName::from_static("client_id"), self.client_id.clone())
             // .header(reqwest::header::HeaderName::from_static("grant_type"), "authorization_code" )
             // .header(reqwest::header::HeaderName::from_static("redirect_uri"), self.redirect_url.clone())
             .body(body)
